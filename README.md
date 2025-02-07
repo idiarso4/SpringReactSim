@@ -135,3 +135,135 @@ Spring Boot Mini Projects</h2>
 <li><a href="https://www.javaguides.net/2019/12/spring-boot-angular-mongodb-crud-example-tutorial.html"><b></b></a><b><a href="https://www.javaguides.net/2019/12/spring-boot-angular-mongodb-crud-example-tutorial.html">Spring Boot + Angular + MongoDB CRUD Example Tutorial</a></b></li>
 <li><b><a href="https://www.javaguides.net/2019/12/spring-boot-mongodb-crud-example-tutorial.html">Spring Boot + MongoDB CRUD Tutorial</a></b></li>
 </b></ul>
+
+### PETUNJUK PENGGUNAAN SISTEM INFORMASI AKADEMIK
+
+============================================
+
+#### A. MANAJEMEN PENILAIAN SISWA
+------------------------------
+
+1. **Input Nilai Baru**
+   - **Login sebagai guru**
+   - **Buka menu "Penilaian Siswa"**
+   - **Klik tombol "+ Create" untuk membuat penilaian baru**
+   - **Isi informasi penilaian:**
+     - **Tanggal:** Pilih tanggal penilaian
+     - **Kelas:** Pilih kelas yang akan dinilai
+     - **Mata Pelajaran:** Isi nama mata pelajaran
+     - **Jenis Penilaian:** Pilih Sumatif atau Non-Sumatif
+     - **Kategori:** Pilih Teori atau Praktik
+     - **Keterangan:** Isi keterangan tambahan (opsional)
+   - **Setelah memilih kelas, daftar siswa akan muncul otomatis**
+   - **Isi nilai untuk setiap siswa (0-100)**
+   - **Isi keterangan per siswa jika diperlukan**
+   - **Klik "Create" untuk menyimpan**
+
+2. **Edit Nilai**
+   - **Buka menu "Penilaian Siswa"**
+   - **Cari penilaian yang ingin diedit**
+   - **Klik tombol "Edit" (ikon pensil)**
+   - **Ubah informasi yang diperlukan**
+   - **Nilai siswa yang sudah ada akan tetap terjaga**
+   - **Klik "Save" untuk menyimpan perubahan**
+
+3. **Export Nilai**
+   - **Buka halaman edit penilaian**
+   - **Klik tombol "Export Excel" di bagian atas**
+   - **File Excel akan terunduh dengan format:**
+     - **Judul:** DAFTAR NILAI SISWA
+     - **Info:** Kelas, Mata Pelajaran, Tanggal
+     - **Kolom:** No, NIS, Nama Siswa, Nilai, Keterangan
+   - **File akan tersimpan dengan nama:**
+     - **nilai_[KELAS]_[MATA_PELAJARAN]_[TANGGAL].xlsx**
+
+4. **Filter dan Pencarian**
+   - **Gunakan filter tanggal untuk mencari penilaian berdasarkan periode**
+   - **Gunakan kolom pencarian untuk mencari berdasarkan:**
+     - **Kelas**
+     - **Mata Pelajaran**
+     - **Guru**
+   - **Filter bisa dikombinasikan untuk pencarian lebih spesifik**
+
+#### B. TIPS PENGGUNAAN
+-----------------
+
+6. **Input Nilai**
+   - **Nilai default adalah 0 jika tidak diisi**
+   - **Nilai harus dalam rentang 0-100**
+   - **Keterangan bersifat opsional**
+   - **Pastikan semua field required terisi**
+
+7. **Edit Nilai**
+   - **Perubahan kelas akan memperbarui daftar siswa**
+   - **Nilai yang sudah ada tidak akan hilang**
+   - **Bisa menambah/mengubah keterangan**
+
+8. **Export**
+   - **Pastikan semua nilai sudah benar sebelum export**
+   - **File Excel bisa dibuka di Microsoft Excel atau aplikasi sejenis**
+   - **Format sudah diatur rapi dengan styling otomatis**
+
+#### C. TROUBLESHOOTING
+-----------------
+
+9. **Nilai tidak tersimpan:**
+   - **Pastikan nilai dalam rentang 0-100**
+   - **Periksa koneksi internet**
+   - **Pastikan semua field required terisi**
+
+10. **Export gagal:**
+    - **Periksa koneksi internet**
+    - **Pastikan browser mengizinkan download**
+    - **Coba refresh halaman dan ulangi export**
+
+11. **Daftar siswa tidak muncul:**
+    - **Pastikan kelas sudah dipilih**
+    - **Refresh halaman jika diperlukan**
+    - **Periksa apakah ada siswa terdaftar di kelas tersebut**
+
+#### D. KEAMANAN
+-----------
+
+12. **Akses**
+    - **Guru hanya bisa melihat dan mengedit nilai yang dia input**
+    - **Admin bisa melihat semua nilai**
+    - **Pastikan logout setelah selesai menggunakan sistem**
+
+13. **Data**
+    - **Backup dilakukan secara berkala**
+    - **Nilai yang sudah disimpan tidak bisa dihapus tanpa izin**
+    - **Perubahan nilai tercatat dalam log sistem**
+
+#### E. FAQ (Frequently Asked Questions)
+-----------------
+
+14. **Bagaimana cara menambahkan keterangan tambahan saat input nilai?**
+    - Saat menginput nilai, ada kolom keterangan yang bisa diisi jika diperlukan. Keterangan ini bersifat opsional.
+
+15. **Apakah saya bisa mengedit nilai yang sudah diinput?**
+    - Ya, Anda bisa mengedit nilai yang sudah diinput. Cari penilaian yang ingin diubah, klik tombol "Edit", ubah nilai atau informasi lainnya, dan klik "Save".
+
+16. **Bagaimana cara mengekspor nilai ke format Excel?**
+    - Buka halaman penilaian yang ingin diekspor, klik tombol "Export Excel" di bagian atas. File Excel akan terunduh dengan format yang telah ditentukan.
+
+17. **Apa yang harus saya lakukan jika daftar siswa tidak muncul saat input nilai?**
+    - Pastikan kelas sudah dipilih dengan benar. Jika masalah masih berlanjut, coba refresh halaman atau periksa apakah ada siswa terdaftar di kelas tersebut.
+
+18. **Bagaimana cara mencari penilaian tertentu?**
+    - Gunakan fitur filter dan pencarian di menu "Penilaian Siswa". Anda bisa mencari berdasarkan tanggal, kelas, mata pelajaran, atau guru.
+
+19. **Apa yang harus saya lakukan jika nilai tidak tersimpan?**
+    - Pastikan nilai dalam rentang 0-100, koneksi internet stabil, dan semua field required terisi. Jika masalah berlanjut, hubungi admin sistem.
+
+20. **Apa yang terjadi jika saya logout dari sistem?**
+    - Logout akan mengakhiri sesi Anda dan Anda harus login kembali untuk mengakses sistem. Pastikan untuk logout setelah selesai menggunakan sistem untuk menjaga keamanan data.
+
+#### F. KONTAK ADMINISTRATOR
+-----------------
+
+- **Email:** support@example.com
+- **Telepon:** (021) xxx-xxxx
+- **Jam Kerja:** Senin-Jumat, 08.00-17.00 WIB
+
+Untuk informasi lebih lanjut atau bantuan, silakan hubungi admin sistem.
