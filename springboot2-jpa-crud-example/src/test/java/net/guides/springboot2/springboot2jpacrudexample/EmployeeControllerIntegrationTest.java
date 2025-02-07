@@ -1,97 +1,222 @@
 package net.guides.springboot2.springboot2jpacrudexample;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import net.guides.springboot2.springboot2jpacrudexample.model.Employee;
+import net.guides.springboot2.springboot2jpacrudexample.model.Role;
+import net.guides.springboot2.springboot2jpacrudexample.model.User;
+import net.guides.springboot2.springboot2jpacrudexample.model.ERole;
+import net.guides.springboot2.springboot2jpacrudexample.payload.request.LoginRequest;
+import net.guides.springboot2.springboot2jpacrudexample.payload.response.JwtResponse;
+import net.guides.springboot2.springboot2jpacrudexample.repository.RoleRepository;
+import net.guides.springboot2.springboot2jpacrudexample.repository.UserRepository;
+import net.guides.springboot2.springboot2jpacrudexample.repository.EmployeeRepository;
 
-@RunWith(SpringRunner.class)
+import java.util.HashSet;
+import java.util.Set;
+
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class EmployeeControllerIntegrationTest {
-	@Autowired
-	private TestRestTemplate restTemplate;
+    @LocalServerPort
+    private int port;
 
-	@LocalServerPort
-	private int port;
+    @Autowired
+    private TestRestTemplate restTemplate;
 
-	private String getRootUrl() {
-		return "http://localhost:" + port;
-	}
+    @Autowired
+    private UserRepository userRepository;
 
-	@Test
-	public void contextLoads() {
+    @Autowired
+    private RoleRepository roleRepository;
 
-	}
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
-	@Test
-	public void testGetAllEmployees() {
-		HttpHeaders headers = new HttpHeaders();
-		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+    @Autowired
+    private PasswordEncoder encoder;
 
-		ResponseEntity<String> response = restTemplate.exchange(getRootUrl() + "/employees",
-				HttpMethod.GET, entity, String.class);
-		
-		assertNotNull(response.getBody());
-	}
+    private String jwtToken;
+    private HttpHeaders headers;
+    private Employee testEmployee;
 
-	@Test
-	public void testGetEmployeeById() {
-		Employee employee = restTemplate.getForObject(getRootUrl() + "/employees/1", Employee.class);
-		System.out.println(employee.getFirstName());
-		assertNotNull(employee);
-	}
+    private String getRootUrl() {
+        return "http://localhost:" + port;
+    }
 
-	@Test
-	public void testCreateEmployee() {
-		Employee employee = new Employee();
-		employee.setEmailId("admin@gmail.com");
-		employee.setFirstName("admin");
-		employee.setLastName("admin");
+    @BeforeEach
+    public void setUp() {
+        // Clear existing data
+        employeeRepository.deleteAll();
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
 
-		ResponseEntity<Employee> postResponse = restTemplate.postForEntity(getRootUrl() + "/employees", employee, Employee.class);
-		assertNotNull(postResponse);
-		assertNotNull(postResponse.getBody());
-	}
+        // Create roles
+        Role adminRole = new Role();
+        adminRole.setName(ERole.ROLE_ADMIN);
+        roleRepository.save(adminRole);
 
-	@Test
-	public void testUpdateEmployee() {
-		int id = 1;
-		Employee employee = restTemplate.getForObject(getRootUrl() + "/employees/" + id, Employee.class);
-		employee.setFirstName("admin1");
-		employee.setLastName("admin2");
+        // Create admin user
+        User admin = new User();
+        admin.setUsername("admin");
+        admin.setEmail("admin@example.com");
+        admin.setPassword(encoder.encode("admin123"));
+        admin.setFullName("Admin User");
+        admin.setActive(true);
+        Set<Role> roles = new HashSet<>();
+        roles.add(adminRole);
+        admin.setRoles(roles);
+        userRepository.save(admin);
 
-		restTemplate.put(getRootUrl() + "/employees/" + id, employee);
+        // Create test employee
+        testEmployee = new Employee();
+        testEmployee.setFirstName("John");
+        testEmployee.setLastName("Doe");
+        testEmployee.setEmailId("john.doe@example.com");
+        testEmployee = employeeRepository.save(testEmployee);
 
-		Employee updatedEmployee = restTemplate.getForObject(getRootUrl() + "/employees/" + id, Employee.class);
-		assertNotNull(updatedEmployee);
-	}
+        // Login to get JWT token
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("admin");
+        loginRequest.setPassword("admin123");
 
-	@Test
-	public void testDeleteEmployee() {
-		int id = 2;
-		Employee employee = restTemplate.getForObject(getRootUrl() + "/employees/" + id, Employee.class);
-		assertNotNull(employee);
+        ResponseEntity<JwtResponse> loginResponse = restTemplate.postForEntity(
+            getRootUrl() + "/api/auth/signin", 
+            loginRequest, 
+            JwtResponse.class
+        );
 
-		restTemplate.delete(getRootUrl() + "/employees/" + id);
+        assertNotNull(loginResponse.getBody(), "Login response should not be null");
+        assertNotNull(loginResponse.getBody().getAccessToken(), "JWT token should not be null");
+        
+        jwtToken = loginResponse.getBody().getAccessToken();
+        
+        // Set up headers with JWT token
+        headers = new HttpHeaders();
+        headers.setBearerAuth(jwtToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+    }
 
-		try {
-			employee = restTemplate.getForObject(getRootUrl() + "/employees/" + id, Employee.class);
-		} catch (final HttpClientErrorException e) {
-			assertEquals(e.getStatusCode(), HttpStatus.NOT_FOUND);
-		}
-	}
+    @Test
+    public void testGetAllEmployees() {
+        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+            getRootUrl() + "/api/v1/employees",
+            HttpMethod.GET, 
+            entity, 
+            String.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    public void testGetEmployeeById() {
+        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+
+        ResponseEntity<Employee> response = restTemplate.exchange(
+            getRootUrl() + "/api/v1/employees/" + testEmployee.getId(),
+            HttpMethod.GET,
+            entity,
+            Employee.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(testEmployee.getFirstName(), response.getBody().getFirstName());
+    }
+
+    @Test
+    public void testCreateEmployee() {
+        Employee employee = new Employee();
+        employee.setEmailId("test@example.com");
+        employee.setFirstName("Test");
+        employee.setLastName("User");
+
+        HttpEntity<Employee> entity = new HttpEntity<>(employee, headers);
+
+        ResponseEntity<Employee> response = restTemplate.exchange(
+            getRootUrl() + "/api/v1/employees",
+            HttpMethod.POST,
+            entity,
+            Employee.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Test", response.getBody().getFirstName());
+        assertEquals("User", response.getBody().getLastName());
+    }
+
+    @Test
+    public void testUpdateEmployee() {
+        HttpEntity<String> getEntity = new HttpEntity<>(null, headers);
+
+        ResponseEntity<Employee> getResponse = restTemplate.exchange(
+            getRootUrl() + "/api/v1/employees/" + testEmployee.getId(),
+            HttpMethod.GET,
+            getEntity,
+            Employee.class
+        );
+
+        Employee employee = getResponse.getBody();
+        assertNotNull(employee, "Employee should not be null");
+        
+        employee.setFirstName("Updated");
+        employee.setLastName("Name");
+
+        HttpEntity<Employee> putEntity = new HttpEntity<>(employee, headers);
+
+        ResponseEntity<Employee> putResponse = restTemplate.exchange(
+            getRootUrl() + "/api/v1/employees/" + testEmployee.getId(),
+            HttpMethod.PUT,
+            putEntity,
+            Employee.class
+        );
+
+        assertEquals(HttpStatus.OK, putResponse.getStatusCode());
+        assertNotNull(putResponse.getBody());
+        assertEquals("Updated", putResponse.getBody().getFirstName());
+        assertEquals("Name", putResponse.getBody().getLastName());
+    }
+
+    @Test
+    public void testDeleteEmployee() {
+        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+
+        ResponseEntity<Employee> getResponse = restTemplate.exchange(
+            getRootUrl() + "/api/v1/employees/" + testEmployee.getId(),
+            HttpMethod.GET,
+            entity,
+            Employee.class
+        );
+
+        assertEquals(HttpStatus.OK, getResponse.getStatusCode());
+
+        restTemplate.exchange(
+            getRootUrl() + "/api/v1/employees/" + testEmployee.getId(),
+            HttpMethod.DELETE,
+            entity,
+            Void.class
+        );
+
+        ResponseEntity<Employee> verifyDeleteResponse = restTemplate.exchange(
+            getRootUrl() + "/api/v1/employees/" + testEmployee.getId(),
+            HttpMethod.GET,
+            entity,
+            Employee.class
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, verifyDeleteResponse.getStatusCode());
+    }
 }
