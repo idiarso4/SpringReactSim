@@ -262,7 +262,7 @@ Spring Boot Mini Projects</h2>
 #### F. KONTAK ADMINISTRATOR
 -----------------
 
-- **Email:** support@example.com
+- **Email:** idiarso48@guru.smk.belajar.id
 - **Telepon:** (021) xxx-xxxx
 - **Jam Kerja:** Senin-Jumat, 08.00-17.00 WIB
 
